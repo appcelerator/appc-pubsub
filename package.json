@@ -1,0 +1,25 @@
+{
+  "name": "appc-pubsub",
+  "version": "0.0.1",
+  "description": "AppC pubsub client library",
+  "main": "index.js",
+  "scripts": {
+    "test": "grunt"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:appcelerator/appc-pubsub.git"
+  },
+  "keywords": [
+    "appcelerator"
+  ],
+  "author": "Jeff Haynie",
+  "license": "Appcelerator Commercial License",
+  "bugs": {
+    "url": "https://github.com/appcelerator/appc-pubsub/issues"
+  },
+  "homepage": "https://github.com/appcelerator/appc-pubsub",
+  "dependencies": {
+    "request": "^2.58.0"
+  }
+}
