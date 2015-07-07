@@ -21,5 +21,13 @@
   "homepage": "https://github.com/appcelerator/appc-pubsub",
   "dependencies": {
     "request": "^2.58.0"
+  },
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-clean": "^0.6.0",
+    "grunt-contrib-jshint": "^0.11.2",
+    "grunt-kahvesi": "^0.2.4",
+    "grunt-mocha-test": "^0.12.7",
+    "mocha": "^2.2.5"
   }
 }
