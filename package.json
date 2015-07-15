@@ -1,6 +1,6 @@
 {
   "name": "appc-pubsub",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "description": "AppC pubsub client library",
   "main": "index.js",
   "scripts": {
