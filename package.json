@@ -1,6 +1,6 @@
 {
   "name": "appc-pubsub",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "AppC pubsub client library",
   "main": "index.js",
   "scripts": {
@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/appcelerator/appc-pubsub",
   "dependencies": {
+    "colors": "^1.1.2",
     "debug": "^2.2.0",
     "internal-ip": "^1.0.1",
     "public-ip": "^1.0.2",
