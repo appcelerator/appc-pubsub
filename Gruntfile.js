@@ -19,16 +19,19 @@ module.exports = function (grunt) {
 		kahvesi: {
 			src: ['test/**/*.js']
 		},
+		appcCoverage: {
+			default_options: {
+				src: 'coverage/lcov.info',
+				force: true
+			}
+		},
 		clean: ['tmp']
 	});
 
 	// Load grunt plugins for modules
-	grunt.loadNpmTasks('grunt-mocha-test');
-	grunt.loadNpmTasks('grunt-contrib-jshint');
-	grunt.loadNpmTasks('grunt-contrib-clean');
-	grunt.loadNpmTasks('grunt-kahvesi');
+	require('load-grunt-tasks')(grunt);
 
 	// register tasks
-	grunt.registerTask('cover', ['kahvesi', 'clean']);
+	grunt.registerTask('cover', ['clean', 'kahvesi']);
 	grunt.registerTask('default', ['jshint', 'mochaTest', 'clean']);
 };

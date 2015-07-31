@@ -1,4 +1,5 @@
 node_modules
 logs
 test.js
+newrelic.js
 *.log
