@@ -1,8 +1,10 @@
+'use strict';
+
 var PubSub = require('../'),
 	util = require('util'),
 	EventEmitter = require('events').EventEmitter;
 
-function MockSocketIO (sendCallback) {
+function MockSocketIO(sendCallback) {
 	this.sendCallback = sendCallback;
 }
 
@@ -23,7 +25,7 @@ MockSocketIO.prototype.emit = function () {
 exports.createMockClientWithSocketIO = function (config, sendCallback, receiveCallback) {
 	config = config || {};
 	config.preferWebSocket = true;
-	var client = new PubSub(config);
+	let client = new PubSub(config);
 	client._reconnect = function () {
 		this._socket = new MockSocketIO(sendCallback, receiveCallback);
 		this._authed = true;
