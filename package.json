@@ -1,6 +1,6 @@
 {
   "name": "appc-pubsub",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "description": "AppC pubsub client library",
   "main": "index.js",
   "scripts": {
@@ -24,8 +24,7 @@
     "debug": "^2.6.3",
     "ip": "^1.1.5",
     "public-ip": "^2.3.3",
-    "request": "^2.81.0",
-    "socket.io-client": "^1.7.3"
+    "request": "^2.81.0"
   },
   "devDependencies": {
     "body-parser": "^1.17.1",
