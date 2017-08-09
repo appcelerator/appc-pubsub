@@ -1,58 +1,30 @@
 const assert = require('assert');
 const crypto = require('crypto');
+const helper = require('./_helper');
 const PubSub = require('../');
 
 // Valid client details should be used
-let key = '',
-	secret = '',
-	pubsub;
+let Request = helper.Request,
+	Response = helper.Response,
+	pubsub = new helper.createMockConfigClient({
+		key: 'key',
+		secret: 'secret'
+	});
 
-/**
- * Mock response object to capture response details.
- */
-function Response() {
-}
-Response.prototype.writeHead = function (code, headers) {
-	this.code = code;
-	this.headers = headers;
-};
-Response.prototype.write = function (str) {
-	this.body = str;
-};
-Response.prototype.end = function () {
-	this.ended = true;
-};
-Response.prototype.wasUnauthorized = function () {
-	return this.code === 401 && this.ended;
-};
-
-/**
- * Mock request object
- * @param {Object} body the request body
- * @param {Object} headers the request headers
- */
-function Request(body, headers) {
-	this.headers = headers || {};
-	this.body = body || {};
-}
+pubsub.updateConfig({
+	auth_type: 'basic',
+	url: 'http://un:pw@localhost:8080.com',
+	can_consume: true,
+	topics: [
+		'com.test.event',
+		'com.test.topic.*'
+	]
+});
 
 describe('webhook', function () {
 
-	// Create a new client and wait for the config to be fetched
-	before('new client', function (next) {
-		pubsub = new PubSub({
-			key: key,
-			secret: secret
-		});
-		pubsub.on('configured', () => next());
-	});
-
-	it('should validate basic auth credentials', function () {
+	it('should validate basic auth credentials are correct', function () {
 		// Set the config and parse the basic auth details
-		pubsub._parseConfig(Object.assign(pubsub.config, {
-			auth_type: 'basic',
-			url: 'http://un:pw@localhost:8080.com'
-		}));
 		let success = false,
 			res = new Response(),
 			req = new Request({}, {
@@ -61,26 +33,31 @@ describe('webhook', function () {
 
 		// Test the return value and that the callback is called for middleware use
 		let authed = pubsub.authenticateWebhook(req, res, () => success = true);
-		// Both should have succeeded
-		assert.ok(success && authed);
+		// Both should have succeeded, and the request should be flagged to avoid duplicate checks
+		assert.ok(success && authed && req._authenticatedWebhook);
+	});
 
-		// Make sure incorrect credentials are handled
-		req.headers.authorization = 'Basic ' + new Buffer('un2:pw2').toString('base64');
-		success = false;
-		authed = pubsub.authenticateWebhook(req, res, () => success = true);
+	it('should validate basic auth credentials are incorrect', function () {
+		let success = false,
+			res = new Response(),
+			req = new Request({}, {
+				authorization: 'Basic ' + new Buffer('un2:pw2').toString('base64')
+			});
+
+		let authed = pubsub.authenticateWebhook(req, res, () => success = true);
 		// The return value should be false and the callback should not have been called
-		assert.equal(success || authed, false);
+		assert.equal(success || authed || !!req._authenticatedWebhook, false);
 		// If a response object is given then an unauthorized response should be sent
 		assert.ok(res.wasUnauthorized());
 	});
 
-	it('should validate auth token', function () {
+	it('should validate auth token are correct', function () {
 		// Set the config and parse the basic auth details
-		pubsub._parseConfig(Object.assign(pubsub.config, {
+		pubsub.updateConfig({
 			auth_type: 'token',
 			url: 'http://localhost:8080.com',
 			auth_token: 'test-token'
-		}));
+		});
 		let success = false,
 			res = new Response(),
 			req = new Request({}, {
@@ -89,23 +66,29 @@ describe('webhook', function () {
 
 		// Correct creds
 		let authed = pubsub.authenticateWebhook(req, res, () => success = true);
-		assert.ok(success && authed);
+		assert.ok(success && authed && req._authenticatedWebhook);
+	});
 
+	it('should validate auth token are incorrect', function () {
 		// Incorrect creds
-		req.headers['x-auth-token'] = 'not-this';
-		success = false;
-		authed = pubsub.authenticateWebhook(req, res, () => success = true);
-		assert.equal(success || authed, false);
+		let success = false,
+			res = new Response(),
+			req = new Request({}, {
+				'x-auth-token': 'not-this'
+			});
+
+		let authed = pubsub.authenticateWebhook(req, res, () => success = true);
+		assert.equal(success || authed || !!req._authenticatedWebhook, false);
 		assert.ok(res.wasUnauthorized());
 	});
 
-	it('should validate key/secret signature', function () {
+	it('should validate key/secret signature is correct', function () {
 		// set the config and parse the basic auth details
-		pubsub._parseConfig(Object.assign(pubsub.config, {
+		pubsub.updateConfig({
 			auth_type: 'key_secret',
 			url: 'http://localhost:8080.com',
 			auth_token: 'test-token'
-		}));
+		});
 		let success = false,
 			res = new Response(),
 			body = { event: 'com.test.event' },
@@ -115,13 +98,19 @@ describe('webhook', function () {
 
 		// Correct creds
 		let authed = pubsub.authenticateWebhook(req, res, () => success = true);
-		assert.ok(success && authed);
+		assert.ok(success && authed && req._authenticatedWebhook);
+	});
 
+	it('should validate key/secret signature is incorrect', function () {
 		// Incorrect creds
-		req.headers['x-signature'] = 'not-this';
-		success = false;
-		authed = pubsub.authenticateWebhook(req, res, () => success = true);
-		assert.equal(success || authed, false);
+		let success = false,
+			res = new Response(),
+			req = new Request({}, {
+				'x-signature': 'not-this'
+			});
+
+		let authed = pubsub.authenticateWebhook(req, res, () => success = true);
+		assert.equal(success || authed || !!req._authenticatedWebhook, false);
 		assert.ok(res.wasUnauthorized());
 	});
 
@@ -141,12 +130,11 @@ describe('webhook', function () {
 	});
 
 	it('should emit using a regex topic', function (next) {
-		let reEvent = 'com.test.topic.*',
-			event = 'com.test.topic.regex',
+		let reEvent = pubsub.config.topics[1],
+			event = reEvent.replace(/\*/g, 'regex'),
 			payload = { event };
 
-		// The regex topic needs to be in the clients configured topics
-		pubsub.config.topics.push(reEvent);
+		// Set a listener using the regex topic
 		pubsub.on(reEvent, function (data) {
 			assert.equal(data, payload);
 			next();
