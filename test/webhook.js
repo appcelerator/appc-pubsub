@@ -15,10 +15,10 @@ pubsub.updateConfig({
 	auth_type: 'basic',
 	url: 'http://un:pw@localhost:8080.com',
 	can_consume: true,
-	topics: [
-		'com.test.event',
-		'com.test.topic.*'
-	]
+	events: {
+		'com.test.event': null,
+		'com.test.topic.*': null
+	}
 });
 
 describe('webhook', function () {
