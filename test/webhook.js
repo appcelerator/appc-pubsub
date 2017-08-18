@@ -114,30 +114,30 @@ describe('webhook', function () {
 		assert.ok(res.wasUnauthorized());
 	});
 
-	it('should emit using an exact event name', function (next) {
+	it('should emit using an exact event name', function (done) {
 		let event = 'com.test.event',
 			payload = { event };
 
 		// Set the listener
-		pubsub.on(event, function (data) {
+		pubsub.on('event:' + event, function (data) {
 			// The request body should be passed through
 			assert.equal(data, payload);
-			next();
+			done();
 		});
 		// Spoof an webhook request skipping authentication
 		pubsub.config.auth_type = null;
 		pubsub.handleWebhook(new Request(payload), new Response());
 	});
 
-	it('should emit using a regex topic', function (next) {
+	it('should emit using a regex topic', function (done) {
 		let reEvent = pubsub.config.topics[1],
 			event = reEvent.replace(/\*/g, 'regex'),
 			payload = { event };
 
 		// Set a listener using the regex topic
-		pubsub.on(reEvent, function (data) {
+		pubsub.on('event:' + reEvent, function (data) {
 			assert.equal(data, payload);
-			next();
+			done();
 		});
 		pubsub.handleWebhook(new Request(payload), new Response());
 	});
