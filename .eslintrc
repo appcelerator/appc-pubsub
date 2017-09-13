@@ -1,3 +1,7 @@
 {
-  "extends": [ "axway/env-node", "axway/+mocha" ]
+  "extends": [ "axway/env-node", "axway/+mocha" ],
+  rules: {
+    'security/detect-child-process': 0,
+    'security/detect-non-literal-regexp': 0
+  }
 }
