@@ -4,4 +4,4 @@ node_js:
 - '6'
 before_script:
 - npm cache clean
-- npm install -g grunt-cli
+- npm run lint

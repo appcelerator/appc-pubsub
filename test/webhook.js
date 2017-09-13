@@ -1,7 +1,6 @@
 const assert = require('assert');
 const crypto = require('crypto');
 const helper = require('./_helper');
-const PubSub = require('../');
 
 // Valid client details should be used
 let Request = helper.Request,
@@ -147,7 +146,7 @@ describe('webhook', function () {
 			payload = { event };
 
 		// Set the listener
-		pubsub.on('com.different.event', function (data) {
+		pubsub.on('com.different.event', function () {
 			assert.fail('Listener should not have been called');
 		});
 		pubsub.handleWebhook(new Request(payload), new Response());
