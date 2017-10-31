@@ -1,6 +1,6 @@
 {
   "name": "appc-pubsub",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "AppC pubsub client library",
   "main": "index.js",
   "scripts": {
@@ -29,7 +29,7 @@
   "devDependencies": {
     "body-parser": "^1.17.2",
     "eslint": "^4.6.1",
-    "eslint-config-axway": "^2.0.2",
+    "eslint-config-axway": "^2.0.6",
     "eslint-plugin-mocha": "^4.11.0",
     "express": "^4.15.4",
     "mocha": "^3.5.0",
