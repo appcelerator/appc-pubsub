@@ -16,7 +16,7 @@ pubsub.updateConfig({
 	can_consume: true,
 	events: {
 		'com.test.event': null,
-		'com.test.topic.*': null
+		'com.test.topic.+': null
 	}
 });
 
@@ -130,7 +130,7 @@ describe('webhook', function () {
 
 	it('should emit using a regex topic', function (done) {
 		let reEvent = pubsub.config.topics[1],
-			event = reEvent.replace(/\*/g, 'regex'),
+			event = reEvent.replace(/\+/g, 'regex'),
 			payload = { event };
 
 		// Set a listener using the regex topic
@@ -141,12 +141,23 @@ describe('webhook', function () {
 		pubsub.handleWebhook(new Request(payload), new Response());
 	});
 
+	it('should not receive an event with a descendant topic', function () {
+		let event = 'com.test.event.descendent.topic',
+			payload = { event };
+
+		// Set the listener
+		pubsub.on('event:com.test.event', function () {
+			assert.fail('Listener should not have been called');
+		});
+		pubsub.handleWebhook(new Request(payload), new Response());
+	});
+
 	it('should not receive an unrelated event', function () {
 		let event = 'com.unrelated.event',
 			payload = { event };
 
 		// Set the listener
-		pubsub.on('com.different.event', function () {
+		pubsub.on('event:com.different.event', function () {
 			assert.fail('Listener should not have been called');
 		});
 		pubsub.handleWebhook(new Request(payload), new Response());
