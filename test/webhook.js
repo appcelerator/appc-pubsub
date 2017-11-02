@@ -16,7 +16,7 @@ pubsub.updateConfig({
 	can_consume: true,
 	events: {
 		'com.test.event': null,
-		'com.test.topic.+': null
+		'com.test.topic.*': null
 	}
 });
 
@@ -130,7 +130,7 @@ describe('webhook', function () {
 
 	it('should emit using a regex topic', function (done) {
 		let reEvent = pubsub.config.topics[1],
-			event = reEvent.replace(/\+/g, 'regex'),
+			event = reEvent.replace(/\*/g, 'regex'),
 			payload = { event };
 
 		// Set a listener using the regex topic
