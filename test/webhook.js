@@ -132,7 +132,6 @@ describe('webhook', function () {
 		pubsub.handleWebhook(new Request(payload), new Response());
 	});
 
-
 	it('should not receive an unrelated event', function () {
 		let topic = 'com.unrelated.event',
 			payload = { topic };
