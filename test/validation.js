@@ -23,29 +23,29 @@ pubsub.updateConfig({
 describe('validation', function () {
 
 	it('should validate exact event name matches', function () {
-		assert.ok(pubsub.isSubscribedTopic('com.test.event'));
+		assert.equal(pubsub.getSubscribedTopic('com.test.event'), 'com.test.event');
 	});
 
 	it('should validate events matching wildcard terminus segment', function () {
-		assert.ok(pubsub.isSubscribedTopic('com.test.topic.anything'));
+		assert.equal(pubsub.getSubscribedTopic('com.test.topic.anything'), 'com.test.topic.*');
 	});
 
 	it('should validate events matching wildcard interior segment', function () {
-		assert.ok(pubsub.isSubscribedTopic('com.test.anything.interior'));
+		assert.equal(pubsub.getSubscribedTopic('com.test.anything.interior'), 'com.test.*.interior');
 	});
 
 	it('should validate events matching double-splatted topic', function () {
-		assert.ok(pubsub.isSubscribedTopic('com.splatted.shortName'));
-		assert.ok(pubsub.isSubscribedTopic('com.splatted.a.much.longer.event.name'));
+		assert.equal(pubsub.getSubscribedTopic('com.splatted.shortName'), 'com.splatted.**');
+		assert.equal(pubsub.getSubscribedTopic('com.splatted.a.much.longer.event.name'), 'com.splatted.**');
 	});
 
 	it('should not validate unsubscribed event topics', function () {
-		assert.equal(pubsub.isSubscribedTopic('com.invalid.event'), false);
+		assert.equal(pubsub.getSubscribedTopic('com.invalid.event'), null);
 	});
 
 	it('should not validate descendant topics', function () {
-		assert.equal(pubsub.isSubscribedTopic('com.test.event.descendant'), false);
-		assert.equal(pubsub.isSubscribedTopic('com.test.topic.wildcard.descendant'), false);
-		assert.equal(pubsub.isSubscribedTopic('com.test.wildcard.interior.descendant'), false);
+		assert.equal(pubsub.getSubscribedTopic('com.test.event.descendant'), null);
+		assert.equal(pubsub.getSubscribedTopic('com.test.topic.wildcard.descendant'), null);
+		assert.equal(pubsub.getSubscribedTopic('com.test.wildcard.interior.descendant'), null);
 	});
 });
