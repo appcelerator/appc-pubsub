@@ -1,14 +1,16 @@
+'use strict';
+
 const assert = require('assert');
 const crypto = require('crypto');
 const helper = require('./_helper');
 
 // Valid client details should be used
-let Request = helper.Request,
-	Response = helper.Response,
-	pubsub = new helper.createMockConfigClient({
-		key: 'key',
-		secret: 'secret'
-	});
+let Request = helper.Request;
+let Response = helper.Response;
+let pubsub = new helper.createMockConfigClient({
+	key: 'key',
+	secret: 'secret'
+});
 
 pubsub.updateConfig({
 	auth_type: 'basic',
@@ -16,7 +18,9 @@ pubsub.updateConfig({
 	can_consume: true,
 	events: {
 		'com.test.event': null,
-		'com.test.topic.*': null
+		'com.test.topic.*': null,
+		'com.test.*.interior': null,
+		'com.splatted.**': null
 	}
 });
 
@@ -114,11 +118,11 @@ describe('webhook', function () {
 	});
 
 	it('should emit using an exact event name', function (done) {
-		let event = 'com.test.event',
-			payload = { event };
+		let topic = pubsub.config.topics[0],
+			payload = { topic };
 
 		// Set the listener
-		pubsub.on('event:' + event, function (data) {
+		pubsub.on('event:' + topic, function (data) {
 			// The request body should be passed through
 			assert.equal(data, payload);
 			done();
@@ -128,33 +132,10 @@ describe('webhook', function () {
 		pubsub.handleWebhook(new Request(payload), new Response());
 	});
 
-	it('should emit using a regex topic', function (done) {
-		let reEvent = pubsub.config.topics[1],
-			event = reEvent.replace(/\*/g, 'regex'),
-			payload = { event };
-
-		// Set a listener using the regex topic
-		pubsub.on('event:' + reEvent, function (data) {
-			assert.equal(data, payload);
-			done();
-		});
-		pubsub.handleWebhook(new Request(payload), new Response());
-	});
-
-	it('should not receive an event with a descendant topic', function () {
-		let event = 'com.test.event.descendent.topic',
-			payload = { event };
-
-		// Set the listener
-		pubsub.on('event:com.test.event', function () {
-			assert.fail('Listener should not have been called');
-		});
-		pubsub.handleWebhook(new Request(payload), new Response());
-	});
 
 	it('should not receive an unrelated event', function () {
-		let event = 'com.unrelated.event',
-			payload = { event };
+		let topic = 'com.unrelated.event',
+			payload = { topic };
 
 		// Set the listener
 		pubsub.on('event:com.different.event', function () {
