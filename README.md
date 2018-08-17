@@ -1,4 +1,6 @@
-# Appcelerator PubSub Client library [![Build Status](https://travis-ci.org/appcelerator/appc-pubsub.svg?branch=master)](https://travis-ci.org/appcelerator/appc-pubsub)
+# Appcelerator PubSub Client library
+
+ [![NPM version](https://badge.fury.io/js/appc-pubsub.svg)](http://badge.fury.io/js/appc-pubsub)
 
 The library makes it easy to publish events to the Appcelerator PubSub API service.
 
