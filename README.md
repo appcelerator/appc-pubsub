@@ -33,8 +33,6 @@ pubsub.publish('com.foo.bar', {bar:1});
 ```
 ## Events
 
-
-
 ### Configured
 Emitted when the configurations (APIKey, secret..etc) are authenticated successfully by PubSub server.
 
@@ -43,7 +41,7 @@ pubsub.on('configured', function(config){
     //do something ...
 });
 
-//example of config object: 
+//example of the returned config object: 
 { can_publish: true,
   can_consume: false,
   events: {},
@@ -78,7 +76,6 @@ pubsub.on('unauthorized', function(error){
     //do something ...
 });
 ```
-The call-back function will be called 
 
 ## License
 
