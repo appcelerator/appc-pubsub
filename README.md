@@ -31,20 +31,26 @@ You can optional pass payload data for your event by passing an object as the se
 ```javascript
 pubsub.publish('com.foo.bar', {bar:1});
 ```
+## Events
 
-## Error handling
-This library is an event-driven one, means, in order to handle an error, you should listen to as specific event name based on the error type. 
+### Configured
+Emitted when the configurations (APIKey, secret..etc) are authenticated successfully by PubSub server.
 
-*More error events (types) will be added*
+```javascript
+pubsub.on('configured', function(error){
+    //do something ...
+});
+```
+ 
 ### Unauthorized
+Emitted when the client couldn't connect to the PubSub server due to bad credentials. i.e. HTTP code *401*
 
 ```javascript
 pubsub.on('unauthorized', function(error){
     //do something ...
 });
 ```
-The call-back function will be called when the client couldn't connect to the PubSub server due to bad credentials. i.e. HTTP code *401*
-
+The call-back function will be called 
 
 ## License
 
