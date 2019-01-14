@@ -41,7 +41,18 @@ pubsub.on('configured', function(error){
     //do something ...
 });
 ```
- 
+
+### Retry
+Emitted when an event is rescheduled to re-sending. The event will be emitted first then the re-send occurs.
+
+ *500ms Max time between event's emitting and re-sending*
+
+```javascript
+pubsub.on('retry', function(error){
+    //do something ...
+});
+```
+
 ### Unauthorized
 Emitted when the client couldn't connect to the PubSub server due to bad credentials. i.e. HTTP code *401*
 
