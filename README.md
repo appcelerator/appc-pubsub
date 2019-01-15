@@ -57,6 +57,19 @@ pubsub.on('response', function(response){
 });
 ```
 
+### Event (WebHook)
+*Note: Make sure the client has consumption enabled, check `can_consume` in the returned config object.*
+
+Emitted when an event is received and that matches the subscribed topic.
+Event's payload (object) will be returned by the call-back function
+
+```javascript
+const topicName = 'com.foo.downloaded'
+pubsub.on(`event:${topicName}`, function(eventPayload){
+    //do something ...
+});
+```
+
 ### Retry
 Emitted when an event is rescheduled to re-sending. The event will be emitted first then the re-send occurs.
 
