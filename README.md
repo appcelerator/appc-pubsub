@@ -13,11 +13,11 @@ The library makes it easy to publish events to the Appcelerator PubSub API servi
 You must first include the library and create an instance.  At a minimum, you must pass in the `key` and `secret` values for constructing the client.
 
 ```javascript
-var PubSub = require('appc-pubsub'),
-    pubsub = new PubSub({
-        key: 'MY_KEY',
-        secret: 'MY_SECRET'
-    });
+const PubSubClient = require('appc-pubsub');
+const pubsub = new PubSubClient({
+  key: 'MY_KEY',
+  secret: 'MY_SECRET'
+});
 ```
 
 Once you have created the client instance, you can publish events.
@@ -29,7 +29,7 @@ pubsub.publish('com.foo.bar');
 You can optional pass payload data for your event by passing an object as the second parameter:
 
 ```javascript
-pubsub.publish('com.foo.bar', {bar:1});
+pubsub.publish('com.foo.bar', { bar: 1 });
 ```
 ## Events
 
@@ -37,23 +37,25 @@ pubsub.publish('com.foo.bar', {bar:1});
 Emitted when the configurations (APIKey, secret..etc) are authenticated successfully by PubSub server.
 
 ```javascript
-pubsub.on('configured', function(config){
-    //do something ...
+pubsub.on('configured', function (config) {
+  //do something ...
 });
 
 //example of the returned config object: 
-{ can_publish: true,
+{
+  can_publish: true,
   can_consume: false,
   events: {},
-  auth_type: 'key_secret' }
+  auth_type: 'key_secret'
+}
 ```
 
 ### Response
 Emitted when an event is successfully sent.The `response` object that returned by the call-back contains a raw data of the event request (HTTP). i.e. `statusCode`,`body` etc... keys are available.
 
 ```javascript
-pubsub.on('response', function(response){
-    //do something ...
+pubsub.on('response', function (response) {
+  //do something ...
 });
 ```
 
@@ -65,8 +67,11 @@ Event's payload (object) will be returned by the call-back function
 
 ```javascript
 const topicName = 'com.foo.downloaded'
-pubsub.on(`event:${topicName}`, function(eventPayload){
-    //do something ...
+pubsub.on(`event:${topicName}`, function (event) {
+  // Log event name and data
+  console.log(event.event);
+  console.log(event.data);
+  //do something with the event...
 });
 ```
 
@@ -76,8 +81,8 @@ Emitted when an event is rescheduled to re-sending. The event will be emitted fi
  *500ms Max time between event's emitting and re-sending*
 
 ```javascript
-pubsub.on('retry', function(data){
-    //do something ...
+pubsub.on('retry', function (data) {
+  //do something ...
 });
 ```
 
@@ -85,8 +90,8 @@ pubsub.on('retry', function(data){
 Emitted when the client couldn't connect to the PubSub server due to bad credentials. i.e. HTTP code *401*
 
 ```javascript
-pubsub.on('unauthorized', function(error){
-    //do something ...
+pubsub.on('unauthorized', function (error) {
+  //do something ...
 });
 ```
 
