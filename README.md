@@ -19,8 +19,18 @@ var PubSub = require('appc-pubsub'),
         secret: 'MY_SECRET'
     });
 ```
+### Options
+------
+The PubSub constructor takes an object that may contain any of the following keys:
 
-Once you have created the client instance, you can publish events.
+#### batching
+------
+Determines if the events should be send in batch. Defaults to false.
+
+When set to true (or an object of options) events will be staged and sent on a recurring interval determined by the option **maxWait** in milliseconds.
+
+## Example
+---
 
 ```javascript
 pubsub.publish('com.foo.bar');
