@@ -14,7 +14,7 @@ let pubsub = new helper.createMockConfigClient({
 
 pubsub.updateConfig({
 	auth_type: 'basic',
-	url: 'http://un:pw@localhost:8080.com',
+	url: 'http://un:pw@axwaylocal.com',
 	can_consume: true,
 	events: {
 		'com.test.event': null,
@@ -31,7 +31,7 @@ describe('webhook', function () {
 		let success = false,
 			res = new Response(),
 			req = new Request({}, {
-				authorization: 'Basic ' + new Buffer('un:pw').toString('base64')
+				authorization: 'Basic ' + Buffer.from('un:pw').toString('base64')
 			});
 
 		// Test the return value and that the callback is called for middleware use
@@ -44,7 +44,7 @@ describe('webhook', function () {
 		let success = false,
 			res = new Response(),
 			req = new Request({}, {
-				authorization: 'Basic ' + new Buffer('un2:pw2').toString('base64')
+				authorization: 'Basic ' + Buffer.from('un2:pw2').toString('base64')
 			});
 
 		let authed = pubsub.authenticateWebhook(req, res, () => success = true);
@@ -58,7 +58,7 @@ describe('webhook', function () {
 		// Set the config and parse the basic auth details
 		pubsub.updateConfig({
 			auth_type: 'token',
-			url: 'http://localhost:8080.com',
+			url: 'http://axwaylocal.com',
 			auth_token: 'test-token'
 		});
 		let success = false,
@@ -89,7 +89,7 @@ describe('webhook', function () {
 		// set the config and parse the basic auth details
 		pubsub.updateConfig({
 			auth_type: 'key_secret',
-			url: 'http://localhost:8080.com',
+			url: 'http://axwaylocal.com',
 			auth_token: 'test-token'
 		});
 		let success = false,

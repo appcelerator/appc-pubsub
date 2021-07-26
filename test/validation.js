@@ -18,7 +18,7 @@ let events = {
 let topics = Object.keys(events);
 
 pubsub.updateConfig({
-	url: 'http://un:pw@localhost:8080.com',
+	url: 'http://un:pw@axwaylocal.com',
 	can_consume: true,
 	events
 });
