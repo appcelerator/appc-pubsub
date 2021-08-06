@@ -49,7 +49,7 @@ describe('webhook', function () {
 
 		let authed = pubsub.authenticateWebhook(req, res, () => success = true);
 		// The return value should be false and the callback should not have been called
-		assert.equal(success || authed || !!req._authenticatedWebhook, false);
+		assert.strictEqual(success || authed || !!req._authenticatedWebhook, false);
 		// If a response object is given then an unauthorized response should be sent
 		assert.ok(res.wasUnauthorized());
 	});
@@ -81,7 +81,7 @@ describe('webhook', function () {
 			});
 
 		let authed = pubsub.authenticateWebhook(req, res, () => success = true);
-		assert.equal(success || authed || !!req._authenticatedWebhook, false);
+		assert.strictEqual(success || authed || !!req._authenticatedWebhook, false);
 		assert.ok(res.wasUnauthorized());
 	});
 
@@ -113,7 +113,7 @@ describe('webhook', function () {
 			});
 
 		let authed = pubsub.authenticateWebhook(req, res, () => success = true);
-		assert.equal(success || authed || !!req._authenticatedWebhook, false);
+		assert.strictEqual(success || authed || !!req._authenticatedWebhook, false);
 		assert.ok(res.wasUnauthorized());
 	});
 
@@ -124,7 +124,7 @@ describe('webhook', function () {
 		// Set the listener
 		pubsub.on('event:' + topic, function (data) {
 			// The request body should be passed through
-			assert.equal(data, payload);
+			assert.strictEqual(data, payload);
 			done();
 		});
 		// Spoof an webhook request skipping authentication
