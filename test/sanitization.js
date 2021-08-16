@@ -3,7 +3,7 @@
 const should = require('should');
 const helper = require('./_helper');
 
-describe('serialization', function () {
+describe('sanitization', function () {
 
 	it('should do no harm to original object', function (done) {
 		let bar = {

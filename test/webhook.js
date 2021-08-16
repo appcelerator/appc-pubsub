@@ -11,18 +11,22 @@ let pubsub = new helper.createMockConfigClient({
 	key: 'key',
 	secret: 'secret'
 });
+const events = {
+	'com.test.event': null,
+	'com.test.topic.*': null,
+	'com.test.*.interior': null,
+	'com.splatted.**': null
+};
 
-pubsub.updateConfig({
-	auth_type: 'basic',
-	url: 'http://un:pw@axwaylocal.com',
+const url = new URL('http://un:pw@axwaylocal.com');
+pubsub.config = {
+	url: url.href,
 	can_consume: true,
-	events: {
-		'com.test.event': null,
-		'com.test.topic.*': null,
-		'com.test.*.interior': null,
-		'com.splatted.**': null
-	}
-});
+	auth_type: 'basic',
+	auth_user: url.username,
+	auth_pass: url.password,
+	topics: Object.keys(events)
+};
 
 describe('webhook', function () {
 
@@ -49,18 +53,18 @@ describe('webhook', function () {
 
 		let authed = pubsub.authenticateWebhook(req, res, () => success = true);
 		// The return value should be false and the callback should not have been called
-		assert.equal(success || authed || !!req._authenticatedWebhook, false);
+		assert.strictEqual(success || authed || !!req._authenticatedWebhook, false);
 		// If a response object is given then an unauthorized response should be sent
 		assert.ok(res.wasUnauthorized());
 	});
 
 	it('should validate auth token are correct', function () {
-		// Set the config and parse the basic auth details
-		pubsub.updateConfig({
-			auth_type: 'token',
-			url: 'http://axwaylocal.com',
-			auth_token: 'test-token'
-		});
+		// Change config to auth token.
+		pubsub.config.auth_type = 'token';
+		pubsub.config.url = 'http://axwaylocal.com';
+		pubsub.config.auth_token = 'test-token';
+		delete pubsub.config.auth_user;
+		delete pubsub.config.auth_pass;
 		let success = false,
 			res = new Response(),
 			req = new Request({}, {
@@ -81,17 +85,15 @@ describe('webhook', function () {
 			});
 
 		let authed = pubsub.authenticateWebhook(req, res, () => success = true);
-		assert.equal(success || authed || !!req._authenticatedWebhook, false);
+		assert.strictEqual(success || authed || !!req._authenticatedWebhook, false);
 		assert.ok(res.wasUnauthorized());
 	});
 
 	it('should validate key/secret signature is correct', function () {
-		// set the config and parse the basic auth details
-		pubsub.updateConfig({
-			auth_type: 'key_secret',
-			url: 'http://axwaylocal.com',
-			auth_token: 'test-token'
-		});
+		// Change config to key/secret.
+		pubsub.config.auth_type = 'key_secret';
+		delete pubsub.config.auth_token;
+
 		let success = false,
 			res = new Response(),
 			body = { event: 'com.test.event' },
@@ -113,7 +115,7 @@ describe('webhook', function () {
 			});
 
 		let authed = pubsub.authenticateWebhook(req, res, () => success = true);
-		assert.equal(success || authed || !!req._authenticatedWebhook, false);
+		assert.strictEqual(success || authed || !!req._authenticatedWebhook, false);
 		assert.ok(res.wasUnauthorized());
 	});
 
@@ -124,7 +126,7 @@ describe('webhook', function () {
 		// Set the listener
 		pubsub.on('event:' + topic, function (data) {
 			// The request body should be passed through
-			assert.equal(data, payload);
+			assert.strictEqual(data, payload);
 			done();
 		});
 		// Spoof an webhook request skipping authentication

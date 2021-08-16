@@ -21,9 +21,6 @@ function MockConfigClient() {
 }
 util.inherits(MockConfigClient, PubSub);
 MockConfigClient.prototype.fetchConfig = () => null;
-MockConfigClient.prototype.updateConfig = function (config) {
-	this._parseConfig(Object.assign(this.config || {}, config));
-};
 
 /**
  * Create a client that can have the client config set instead of fetched.
