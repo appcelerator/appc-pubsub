@@ -6,8 +6,8 @@ const PubSub = require('../');
 exports.createMockClient = function (config, sendCallback) {
 	config = config || {};
 	let client = new PubSub(config);
-	client._send = function () {
-		sendCallback && sendCallback.apply(null, arguments);
+	client._send = function (_id, data) {
+		sendCallback && sendCallback.call(null, data);
 	};
 	return client;
 };
