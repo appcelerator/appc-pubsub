@@ -95,6 +95,18 @@ pubsub.on('unauthorized', function (error) {
 });
 ```
 
+### Logging
+
+Logging is handled using the debug module with appc-pubsub:info and appc-pubsub:error namespaces. Logging can be enabled as part of the configuration options.
+
+```javascript
+const pubsub = new PubSubClient({
+  key: 'MY_KEY',
+  secret: 'MY_SECRET',
+  debug: 'info', 'error' or true
+});
+```
+
 ## License
 
 The library is Confidential and Proprietary to Appcelerator, Inc. and licensed under the Appcelerator Software License Agreement. Copyright (c) 2015 by Appcelerator, Inc. All Rights Reserved.
