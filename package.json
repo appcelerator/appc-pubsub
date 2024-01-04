@@ -1,6 +1,6 @@
 {
   "name": "appc-pubsub",
-  "version": "1.8.1",
+  "version": "1.8.0",
   "description": "Amplify Platform PubSub client",
   "main": "index.js",
   "scripts": {
