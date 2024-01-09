@@ -30,7 +30,7 @@ pubsub.config = {
 
 describe('webhook', function () {
 
-	it('should validate basic auth credentials are correct', function () {
+	it('should validate basic auth credentials are correct', async function () {
 		// Set the config and parse the basic auth details
 		let success = false,
 			res = new Response(),
@@ -39,26 +39,26 @@ describe('webhook', function () {
 			});
 
 		// Test the return value and that the callback is called for middleware use
-		let authed = pubsub.authenticateWebhook(req, res, () => success = true);
+		let authed = await pubsub.authenticateWebhook(req, res, () => success = true);
 		// Both should have succeeded, and the request should be flagged to avoid duplicate checks
 		assert.ok(success && authed && req._authenticatedWebhook);
 	});
 
-	it('should validate basic auth credentials are incorrect', function () {
+	it('should validate basic auth credentials are incorrect', async function () {
 		let success = false,
 			res = new Response(),
 			req = new Request({}, {
 				authorization: 'Basic ' + Buffer.from('un2:pw2').toString('base64')
 			});
 
-		let authed = pubsub.authenticateWebhook(req, res, () => success = true);
+		let authed = await pubsub.authenticateWebhook(req, res, () => success = true);
 		// The return value should be false and the callback should not have been called
 		assert.strictEqual(success || authed || !!req._authenticatedWebhook, false);
 		// If a response object is given then an unauthorized response should be sent
 		assert.ok(res.wasUnauthorized());
 	});
 
-	it('should validate auth token are correct', function () {
+	it('should validate auth token are correct', async function () {
 		// Change config to auth token.
 		pubsub.config.auth_type = 'token';
 		pubsub.config.url = 'http://axwaylocal.com';
@@ -72,11 +72,11 @@ describe('webhook', function () {
 			});
 
 		// Correct creds
-		let authed = pubsub.authenticateWebhook(req, res, () => success = true);
+		let authed = await pubsub.authenticateWebhook(req, res, () => success = true);
 		assert.ok(success && authed && req._authenticatedWebhook);
 	});
 
-	it('should validate auth token are incorrect', function () {
+	it('should validate auth token are incorrect', async function () {
 		// Incorrect creds
 		let success = false,
 			res = new Response(),
@@ -84,12 +84,12 @@ describe('webhook', function () {
 				'x-auth-token': 'not-this'
 			});
 
-		let authed = pubsub.authenticateWebhook(req, res, () => success = true);
+		let authed = await pubsub.authenticateWebhook(req, res, () => success = true);
 		assert.strictEqual(success || authed || !!req._authenticatedWebhook, false);
 		assert.ok(res.wasUnauthorized());
 	});
 
-	it('should validate key/secret signature is correct', function () {
+	it('should validate key/secret signature is correct', async function () {
 		// Change config to key/secret.
 		pubsub.config.auth_type = 'key_secret';
 		delete pubsub.config.auth_token;
@@ -102,11 +102,11 @@ describe('webhook', function () {
 			});
 
 		// Correct creds
-		let authed = pubsub.authenticateWebhook(req, res, () => success = true);
+		let authed = await pubsub.authenticateWebhook(req, res, () => success = true);
 		assert.ok(success && authed && req._authenticatedWebhook);
 	});
 
-	it('should validate key/secret signature is incorrect', function () {
+	it('should validate key/secret signature is incorrect', async function () {
 		// Incorrect creds
 		let success = false,
 			res = new Response(),
@@ -114,9 +114,32 @@ describe('webhook', function () {
 				'x-signature': 'not-this'
 			});
 
-		let authed = pubsub.authenticateWebhook(req, res, () => success = true);
+		let authed = await pubsub.authenticateWebhook(req, res, () => success = true);
 		assert.strictEqual(success || authed || !!req._authenticatedWebhook, false);
 		assert.ok(res.wasUnauthorized());
+	});
+
+	it('should parse the body when not already set', async function () {
+		// Change config to key/secret.
+		pubsub.config.auth_type = 'key_secret';
+		delete pubsub.config.auth_token;
+
+		let success = false,
+			res = new Response(),
+			bodyParts = [ '{"event":', '"com.test.body"', '}' ],
+			bodyString = bodyParts.join(''),
+			req = new Request(null, {
+				'x-signature': crypto.createHmac('SHA256', pubsub.secret).update(bodyString).digest('hex'),
+				'content-length': bodyString.length,
+				'content-type': 'application/json'
+			});
+
+		// Emit body
+		let auth = pubsub.authenticateWebhook(req, res, () => success = true);
+		bodyParts.forEach(part => req.emit('data', Buffer.from(part, 'utf8')));
+		req.emit('end');
+		let authed = await auth;
+		assert.ok(success && authed && req._authenticatedWebhook);
 	});
 
 	it('should emit using an exact event name', function (done) {
@@ -129,12 +152,12 @@ describe('webhook', function () {
 			assert.strictEqual(data, payload);
 			done();
 		});
-		// Spoof an webhook request skipping authentication
+		// Spoof a webhook request skipping authentication
 		pubsub.config.auth_type = null;
 		pubsub.handleWebhook(new Request(payload), new Response());
 	});
 
-	it('should not receive an unrelated event', function () {
+	it('should not receive an unrelated event', async function () {
 		let topic = 'com.unrelated.event',
 			payload = { topic };
 
