@@ -1,4 +1,5 @@
 'use strict';
+const EventEmitter = require('events');
 
 const util = require('util');
 const PubSub = require('../');
@@ -33,32 +34,36 @@ exports.createMockConfigClient = function (config) {
 
 /**
  * Mock request object
- * @param {Object} body the request body
- * @param {Object} headers the request headers
  */
-function Request(body, headers) {
-	this.headers = headers || {};
-	this.body = body || {};
+class Request extends EventEmitter {
+	/**
+	 * @param {Object} body the request body
+	 * @param {Object} headers the request headers
+	 */
+	constructor (body, headers) {
+		super();
+		this.headers = headers || {};
+		this.body = body;
+	}
 }
 exports.Request = Request;
 
 /**
  * Mock response object to capture response details.
  */
-function Response() {
+class Response {
+	writeHead(code, headers) {
+		this.code = code;
+		this.headers = headers;
+	}
+	write(str) {
+		this.body = str;
+	}
+	end() {
+		this.ended = true;
+	}
+	wasUnauthorized() {
+		return this.code === 401 && this.ended;
+	}
 }
 exports.Response = Response;
-
-Response.prototype.writeHead = function (code, headers) {
-	this.code = code;
-	this.headers = headers;
-};
-Response.prototype.write = function (str) {
-	this.body = str;
-};
-Response.prototype.end = function () {
-	this.ended = true;
-};
-Response.prototype.wasUnauthorized = function () {
-	return this.code === 401 && this.ended;
-};
