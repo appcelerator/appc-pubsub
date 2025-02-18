@@ -26,7 +26,7 @@
     "eslint": "8.56.0",
     "eslint-config-axway": "9.0.0",
     "eslint-plugin-mocha": "10.2.0",
-    "mocha": "10.2.0",
+    "mocha": "10.8.2",
     "nyc": "15.1.0",
     "should": "13.2.3"
   },
