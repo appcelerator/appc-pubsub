@@ -1,7 +1,7 @@
 'use strict';
 
 const should = require('should');
-const helper = require('./_helper');
+const { MockSendCallbackClient } = require('./_helper');
 
 describe('sanitization', function () {
 
@@ -11,10 +11,11 @@ describe('sanitization', function () {
 				password_salt: 'salt'
 			},
 			config = {
+				url: 'url',
 				key: 'key',
 				secret: 'secret'
 			},
-			pubsub = helper.createMockClient(config, function sender(event) {
+			pubsub = new MockSendCallbackClient(config, function sender(event) {
 				should(event.event).be.equal('foo');
 				should(event).have.property('data');
 				should(event.data).have.property('password', '[HIDDEN]');

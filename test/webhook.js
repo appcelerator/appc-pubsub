@@ -2,31 +2,30 @@
 
 const assert = require('assert');
 const crypto = require('crypto');
-const helper = require('./_helper');
+const { MockConfigClient, MockRequest: Request, MockResponse: Response } = require('./_helper');
 
 // Valid client details should be used
-let Request = helper.Request;
-let Response = helper.Response;
-let pubsub = new helper.createMockConfigClient({
-	key: 'key',
-	secret: 'secret'
-});
+const url = new URL('http://un:pw@axwaylocal.com');
 const events = {
 	'com.test.event': null,
 	'com.test.topic.*': null,
 	'com.test.*.interior': null,
 	'com.splatted.**': null
 };
-
-const url = new URL('http://un:pw@axwaylocal.com');
-pubsub.config = {
-	url: url.href,
-	can_consume: true,
-	auth_type: 'basic',
-	auth_user: url.username,
-	auth_pass: url.password,
-	topics: Object.keys(events)
+const config = {
+	url: 'url',
+	key: 'key',
+	secret: 'secret',
+	config: {
+		url: url.href,
+		can_consume: true,
+		auth_type: 'basic',
+		auth_user: url.username,
+		auth_pass: url.password,
+		topics: Object.keys(events)
+	}
 };
+const pubsub = new MockConfigClient(config);
 
 describe('webhook', function () {
 
@@ -60,11 +59,11 @@ describe('webhook', function () {
 
 	it('should validate auth token are correct', async function () {
 		// Change config to auth token.
-		pubsub.config.auth_type = 'token';
-		pubsub.config.url = 'http://axwaylocal.com';
-		pubsub.config.auth_token = 'test-token';
-		delete pubsub.config.auth_user;
-		delete pubsub.config.auth_pass;
+		pubsub._config.auth_type = 'token';
+		pubsub._config.url = 'http://axwaylocal.com';
+		pubsub._config.auth_token = 'test-token';
+		delete pubsub._config.auth_user;
+		delete pubsub._config.auth_pass;
 		let success = false,
 			res = new Response(),
 			req = new Request({}, {
@@ -91,14 +90,14 @@ describe('webhook', function () {
 
 	it('should validate key/secret signature is correct', async function () {
 		// Change config to key/secret.
-		pubsub.config.auth_type = 'key_secret';
-		delete pubsub.config.auth_token;
+		pubsub._config.auth_type = 'key_secret';
+		delete pubsub._config.auth_token;
 
 		let success = false,
 			res = new Response(),
 			body = { event: 'com.test.event' },
 			req = new Request(body, {
-				'x-signature': crypto.createHmac('SHA256', pubsub.secret).update(JSON.stringify(body)).digest('hex')
+				'x-signature': crypto.createHmac('SHA256', config.secret).update(JSON.stringify(body)).digest('hex')
 			});
 
 		// Correct creds
@@ -121,15 +120,15 @@ describe('webhook', function () {
 
 	it('should parse the body when not already set', async function () {
 		// Change config to key/secret.
-		pubsub.config.auth_type = 'key_secret';
-		delete pubsub.config.auth_token;
+		pubsub._config.auth_type = 'key_secret';
+		delete pubsub._config.auth_token;
 
 		let success = false,
 			res = new Response(),
 			bodyParts = [ '{"event":', '"com.test.body"', '}' ],
 			bodyString = bodyParts.join(''),
 			req = new Request(null, {
-				'x-signature': crypto.createHmac('SHA256', pubsub.secret).update(bodyString).digest('hex'),
+				'x-signature': crypto.createHmac('SHA256', config.secret).update(bodyString).digest('hex'),
 				'content-length': bodyString.length,
 				'content-type': 'application/json'
 			});
@@ -143,7 +142,7 @@ describe('webhook', function () {
 	});
 
 	it('should emit using an exact event name', function (done) {
-		let topic = pubsub.config.topics[0],
+		let topic = pubsub._config.topics[0],
 			payload = { topic };
 
 		// Set the listener
@@ -153,7 +152,7 @@ describe('webhook', function () {
 			done();
 		});
 		// Spoof a webhook request skipping authentication
-		pubsub.config.auth_type = null;
+		pubsub._config.auth_type = null;
 		pubsub.handleWebhook(new Request(payload), new Response());
 	});
 

@@ -1,41 +1,42 @@
 'use strict';
 const EventEmitter = require('events');
 
-const util = require('util');
 const PubSub = require('../');
-
-exports.createMockClient = function (config, sendCallback) {
-	config = config || {};
-	let client = new PubSub(config);
-	client._send = function (_id, data) {
-		sendCallback && sendCallback.call(null, data);
-	};
-	return client;
-};
 
 /**
  * Mock client for avoiding config fetch
  * @class
  */
-function MockConfigClient() {
-	return PubSub.apply(this, arguments);
-}
-util.inherits(MockConfigClient, PubSub);
-MockConfigClient.prototype.fetchConfig = () => null;
+class MockConfigClient extends PubSub {
+	constructor(opts) {
+		super(opts);
 
-/**
- * Create a client that can have the client config set instead of fetched.
- * @param {Object} config the config object
- * @return {MockConfigClient} client
- */
-exports.createMockConfigClient = function (config) {
-	return new MockConfigClient(config);
-};
+		this._config = opts.config;
+	}
+
+	async _fetchConfig() {
+		// do nothing
+	}
+}
+
+class MockSendCallbackClient extends MockConfigClient {
+	#sendCallback;
+
+	constructor(opts, sendCallback) {
+		super(opts);
+
+		this.#sendCallback = sendCallback;
+	}
+
+	async _send(id, data) {
+		this.#sendCallback && this.#sendCallback.call(null, data);
+	}
+}
 
 /**
  * Mock request object
  */
-class Request extends EventEmitter {
+class MockRequest extends EventEmitter {
 	/**
 	 * @param {Object} body the request body
 	 * @param {Object} headers the request headers
@@ -46,12 +47,11 @@ class Request extends EventEmitter {
 		this.body = body;
 	}
 }
-exports.Request = Request;
 
 /**
  * Mock response object to capture response details.
  */
-class Response {
+class MockResponse {
 	writeHead(code, headers) {
 		this.code = code;
 		this.headers = headers;
@@ -66,4 +66,10 @@ class Response {
 		return this.code === 401 && this.ended;
 	}
 }
-exports.Response = Response;
+
+module.exports = {
+	MockConfigClient,
+	MockSendCallbackClient,
+	MockRequest,
+	MockResponse
+};
