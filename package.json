@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:appcelerator/appc-pubsub.git"
+    "url": "git+ssh://git@github.com/appcelerator/appc-pubsub.git"
   },
   "author": "Jeff Haynie",
   "license": "Apache-2.0",
